@@ -13,3 +13,49 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Usuario {
+  id_usuario   Int       @id @default(autoincrement())
+  nome         String
+  email        String    @unique
+  tipo_usuario String
+  data_criacao DateTime  @default(now())
+
+  ticketsAbertos Ticket[]        @relation("UsuarioTickets")
+  historicos     Historico_Ticket[]
+}
+
+model Ticket {
+  id_ticket       Int       @id @default(autoincrement())
+  id_usuario      Int
+  titulo          String
+  descricao       String
+  status_atual    Int
+  prioridade      String
+  data_criacao    DateTime  @default(now())
+  data_fechamento DateTime?
+
+  usuario   Usuario  @relation("UsuarioTickets", fields: [id_usuario], references: [id_usuario])
+  status    Status   @relation(fields: [status_atual], references: [id_status])
+  historico Historico_Ticket[]
+}
+
+model Status {
+  id_status   Int     @id @default(autoincrement())
+  nome_status String
+  descricao   String
+
+  tickets Ticket[]
+}
+
+model Historico_Ticket {
+  id_historico Int      @id @default(autoincrement())
+  id_ticket    Int
+  id_usuario   Int
+  tipo_evento  String
+  mensagem     String
+  data_evento  DateTime @default(now())
+
+  ticket  Ticket  @relation(fields: [id_ticket], references: [id_ticket])
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+}
